@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JpbDataSourceConfig">
+    <data-sources>
+      <data-source id="33d1f741-7c3a-4ac1-b793-2c3bac5f69ad" name="JavaShopApi" url="jdbc:postgresql://localhost/JavaShopApi" driverClass="org.postgresql.Driver" />
+    </data-sources>
+  </component>
+</project>
