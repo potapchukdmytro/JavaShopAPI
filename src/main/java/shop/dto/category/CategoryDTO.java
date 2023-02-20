@@ -1,4 +1,4 @@
-package shop.dto;
+package shop.dto.category;
 
 import lombok.Data;
 

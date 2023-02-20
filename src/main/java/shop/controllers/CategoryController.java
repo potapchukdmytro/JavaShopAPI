@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import shop.dto.CategoryDTO;
 import shop.dto.category.CreateCategoryDTO;
+import shop.dto.category.UpdateCategoryDTO;
 import shop.entities.CategoryEntity;
 import shop.repositories.CategoryRepository;
 
@@ -31,27 +31,31 @@ public class CategoryController {
         return new ResponseEntity<>(category, HttpStatus.OK);
     }
 
-    @PostMapping("update")
-    public ResponseEntity<CategoryEntity> update(@RequestBody CategoryDTO model) {
-        var optional = categoryRepository.findById(model.getId());
-        if(optional.isPresent()) {
-            var newCategory = optional.get();
-            newCategory.setName(model.getName());
-            categoryRepository.save(newCategory);
-            return new ResponseEntity<>(newCategory, HttpStatus.OK);
+    @GetMapping("{id}")
+    public ResponseEntity<CategoryEntity> get(@PathVariable("id") int categoryId) {
+        var catOptional = categoryRepository.findById(categoryId);
+        if (catOptional.isPresent()) {
+            return new ResponseEntity<>(catOptional.get(), HttpStatus.OK);
         }
-        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("delete")
-    public ResponseEntity<CategoryEntity> delete(@RequestBody int id) {
-        var optional = categoryRepository.findById(id);
-        if(optional.isPresent()) {
-            var category = optional.get();
-            categoryRepository.delete(category);
-            return new ResponseEntity<>(category, HttpStatus.OK);
+    @PutMapping("{id}")
+    public ResponseEntity<CategoryEntity> update(@PathVariable("id") int categoryId,
+                                                 @RequestBody UpdateCategoryDTO model) {
+        var catOptional = categoryRepository.findById(categoryId);
+        if (catOptional.isPresent()) {
+            var cat = catOptional.get();
+            cat.setName(model.getName());
+            categoryRepository.save(cat);
+            return new ResponseEntity<>(cat, HttpStatus.OK);
         }
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
 
-        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    @DeleteMapping("{id}")
+    public ResponseEntity<String> delete(@PathVariable("id") int categoryId) {
+        categoryRepository.deleteById(categoryId);
+        return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 }
