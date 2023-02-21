@@ -2,6 +2,7 @@ package shop.controllers;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.dto.category.CreateCategoryDTO;
@@ -9,7 +10,16 @@ import shop.dto.category.UpdateCategoryDTO;
 import shop.entities.CategoryEntity;
 import shop.repositories.CategoryRepository;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
@@ -23,13 +33,36 @@ public class CategoryController {
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<CategoryEntity> create(@RequestBody CreateCategoryDTO model) {
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<CategoryEntity> create(@ModelAttribute CreateCategoryDTO model) {
         CategoryEntity category = new CategoryEntity();
         category.setName(model.getName());
+        category.setDescription(model.getDescription());
+
+        try {
+            String fileName = generateFilename(model.getImage().getOriginalFilename());
+            //Path path = Paths.get("static/images/" + fileName);
+            var url = this.getClass().getClassLoader();
+            File newFile = new File(url + fileName);
+            OutputStream os = new FileOutputStream(newFile);
+            os.write(model.getImage().getBytes());
+            os.close();
+            //Files.write(path, model.getImage().getBytes());
+            category.setImage(fileName);
+        } catch (IOException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
         categoryRepository.save(category);
         return new ResponseEntity<>(category, HttpStatus.OK);
     }
+
+    private String generateFilename(String originalFilename) {
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String uniqueName = UUID.randomUUID().toString();
+        return uniqueName + extension;
+    }
+
 
     @GetMapping("{id}")
     public ResponseEntity<CategoryEntity> get(@PathVariable("id") int categoryId) {
