@@ -3,8 +3,9 @@ package shop.dto.category;
 import lombok.Data;
 
 @Data
-public class CreateCategoryDTO {
+public class CategoryItemDTO {
+    private int id;
     private String name;
-    private String base64;
+    private String image;
     private String description;
 }
