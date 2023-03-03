@@ -13,6 +13,7 @@ import shop.mapper.CategoryMapper;
 import shop.repositories.CategoryRepository;
 import shop.storage.StorageService;
 
+import java.io.File;
 import java.util.List;
 
 @Service
@@ -41,10 +42,14 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryItemDTO update(int id, UpdateCategoryDTO model) {
         var catOptional = categoryRepository.findById(id);
         if (catOptional.isPresent()) {
-            var cat = catOptional.get();
-            cat.setName(model.getName());
-            categoryRepository.save(cat);
-            return categoryMapper.categoryItemDTOByCategory(cat);
+            var category = catOptional.get();
+            storageService.removeFile(category.getImage());
+            var fileName = storageService.save(model.getBase64());
+            category.setImage(fileName);
+            category.setName(model.getName());
+            category.setDescription(model.getDescription());
+            categoryRepository.save(category);
+            return categoryMapper.categoryItemDTOByCategory(category);
         }
         return null;
     }

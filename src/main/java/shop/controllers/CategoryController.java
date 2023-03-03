@@ -30,13 +30,6 @@ public class CategoryController {
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
-    private String generateFilename(String originalFilename) {
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String uniqueName = UUID.randomUUID().toString();
-        return uniqueName + extension;
-    }
-
-
     @GetMapping("{id}")
     public ResponseEntity<CategoryItemDTO> get(@PathVariable("id") int categoryId) {
         var result = categoryService.get(categoryId);
