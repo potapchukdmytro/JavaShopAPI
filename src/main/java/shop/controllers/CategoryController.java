@@ -10,7 +10,6 @@ import shop.dto.category.UpdateCategoryDTO;
 import shop.interfaces.CategoryService;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
