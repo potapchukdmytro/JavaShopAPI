@@ -2,6 +2,7 @@ package shop.controllers;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.dto.category.CategoryItemDTO;
@@ -23,8 +24,8 @@ public class CategoryController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<CategoryItemDTO> create(@RequestBody CreateCategoryDTO model) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CategoryItemDTO> create(@ModelAttribute CreateCategoryDTO model) {
         var result = categoryService.create(model);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
