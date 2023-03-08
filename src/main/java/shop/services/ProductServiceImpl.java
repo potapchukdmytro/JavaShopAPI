@@ -8,11 +8,14 @@ import shop.entities.CategoryEntity;
 import shop.entities.ProductEntity;
 import shop.entities.ProductImageEntity;
 import shop.interfaces.ProductService;
+import shop.mapper.ProductMapper;
 import shop.repositories.ProductImageRepository;
 import shop.repositories.ProductRepository;
 import shop.storage.StorageService;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -20,6 +23,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
     private final StorageService storageService;
+    private final ProductMapper productMapper;
     @Override
     public ProductItemDTO create(ProductCreateDTO model) {
         var p = new ProductEntity();
@@ -45,5 +49,18 @@ public class ProductServiceImpl implements ProductService {
             priority++;
         }
         return null;
+    }
+
+    @Override
+    public List<ProductItemDTO> get() {
+        var products = productRepository.findAll();
+        var result = new ArrayList<ProductItemDTO>();
+        for (var p:products) {
+            var item = productMapper.ProductItemDTOByProduct(p);
+            for(var img : p.getProductImages())
+                item.getFiles().add(img.getName());
+            result.add(item);
+        }
+        return result;
     }
 }
