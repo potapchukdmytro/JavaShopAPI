@@ -1,4 +1,4 @@
-package shop.dto.Files;
+package shop.dto.files;
 
 import lombok.Data;
 
