@@ -1,5 +1,8 @@
 package shop.services;
 
+import org.springframework.web.client.RestOperations;
+import shop.configuration.captcha.CaptchaSettings;
+import shop.configuration.captcha.GoogleResponse;
 import shop.dto.account.LoginDto;
 import shop.dto.account.AuthResponseDto;
 import shop.dto.account.RegisterDto;
@@ -27,6 +30,9 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final CaptchaSettings captchaSettings;
+    private final RestOperations restTemplate;
+    protected static final String RECAPTCHA_URL_TEMPLATE = "https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s";
 
     public AuthResponseDto register(RegisterDto request) {
         var user = UserEntity.builder()
@@ -51,6 +57,13 @@ public class AccountService {
     }
 
     public AuthResponseDto login(LoginDto request) {
+        String url = String.format(RECAPTCHA_URL_TEMPLATE, captchaSettings.getSecret(), request.getReCaptchaToken());
+        GoogleResponse googleResponse = restTemplate.getForObject(url, GoogleResponse.class);
+        if(!googleResponse.isSuccess()) {
+            //throw new Exception("reCaptcha was not successfully validated.");
+            return null;
+        }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -64,5 +77,4 @@ public class AccountService {
                 .token(jwtToken)
                 .build();
     }
-
 }

@@ -1,6 +1,7 @@
 package shop.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +29,10 @@ public class AccountController {
     public ResponseEntity<AuthResponseDto> authenticate(
             @RequestBody LoginDto request
     ) {
+        var auth = service.login(request);
+        if(auth == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         return ResponseEntity.ok(service.login(request));
     }
 }

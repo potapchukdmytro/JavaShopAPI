@@ -40,11 +40,10 @@ public class ApplicationConfig {
                 var userDetails = new User(userEntity.getEmail(), userEntity.getPassword(), roles);
                 return userDetails; // якщо є, то створюється новий юзер на основі того, що в БД
             }
-
             private Collection<? extends GrantedAuthority> getRoles(UserEntity userEntity) {
                 var roles = userRoleRepository.findByUser(userEntity);
-                String[] userRoles = roles.stream()                                      //витягується списочок ролей, які є у юзера
-                        .map((role) -> role.getRole().getName()).toArray(String[]::new);
+                String [] userRoles = roles.stream()                                      //витягується списочок ролей, які є у юзера
+                        .map((role) -> role.getRole().getName()).toArray(String []:: new);
                 Collection<GrantedAuthority> authorityCollections =                               //створюється нова колекція authorityCollections
                         AuthorityUtils.createAuthorityList(userRoles);
                 return authorityCollections;
