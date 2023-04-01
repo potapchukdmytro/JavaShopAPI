@@ -22,7 +22,11 @@ public class AccountController {
     public ResponseEntity<AuthResponseDto> register(
             @RequestBody RegisterDto request
     ) {
-        return ResponseEntity.ok(service.register(request));
+        var auth = service.register(request);
+        if(auth == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(auth);
     }
 
     @PostMapping("/login")
@@ -33,6 +37,6 @@ public class AccountController {
         if(auth == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok(service.login(request));
+        return ResponseEntity.ok(auth);
     }
 }

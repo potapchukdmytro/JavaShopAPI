@@ -35,6 +35,13 @@ public class AccountService {
     protected static final String RECAPTCHA_URL_TEMPLATE = "https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s";
 
     public AuthResponseDto register(RegisterDto request) {
+        String url = String.format(RECAPTCHA_URL_TEMPLATE, captchaSettings.getSecret(), request.getReCaptchaToken());
+        GoogleResponse googleResponse = restTemplate.getForObject(url, GoogleResponse.class);
+        if(!googleResponse.isSuccess()) {
+            //throw new Exception("reCaptcha was not successfully validated.");
+            return null;
+        }
+
         var user = UserEntity.builder()
                 .firstName(request.getFirstname())
                 .lastName(request.getLastname())
