@@ -24,8 +24,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf()
-                .disable()
+                .cors().and().csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/account/**").permitAll()
                 .requestMatchers("/files/**").permitAll()
@@ -35,7 +34,8 @@ public class SecurityConfiguration {
                 .requestMatchers("/webjars/**").permitAll()
                 .requestMatchers("/rest-api-docs/**").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
-                .requestMatchers("/api/categories/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
+                .requestMatchers("/api/categories/**").hasAuthority(Roles.Admin)
                 .requestMatchers(HttpMethod.GET,"/api/products").permitAll()
                 .requestMatchers("/api/products/**").hasAuthority(Roles.Admin)
                 .anyRequest().authenticated()
