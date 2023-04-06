@@ -1,8 +1,11 @@
 package shop.services;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.client.RestOperations;
 import shop.configuration.captcha.CaptchaSettings;
 import shop.configuration.captcha.GoogleResponse;
+import shop.dto.account.GoogleAuthDto;
 import shop.dto.account.LoginDto;
 import shop.dto.account.AuthResponseDto;
 import shop.dto.account.RegisterDto;
@@ -19,7 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import shop.repositories.UserRoleRepository;
 
-import java.util.ArrayList;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,13 +38,6 @@ public class AccountService {
     protected static final String RECAPTCHA_URL_TEMPLATE = "https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s";
 
     public AuthResponseDto register(RegisterDto request) {
-        String url = String.format(RECAPTCHA_URL_TEMPLATE, captchaSettings.getSecret(), request.getReCaptchaToken());
-        GoogleResponse googleResponse = restTemplate.getForObject(url, GoogleResponse.class);
-        if(!googleResponse.isSuccess()) {
-            //throw new Exception("reCaptcha was not successfully validated.");
-            return null;
-        }
-
         var user = UserEntity.builder()
                 .firstName(request.getFirstname())
                 .lastName(request.getLastname())
@@ -64,13 +60,6 @@ public class AccountService {
     }
 
     public AuthResponseDto login(LoginDto request) {
-        String url = String.format(RECAPTCHA_URL_TEMPLATE, captchaSettings.getSecret(), request.getReCaptchaToken());
-        GoogleResponse googleResponse = restTemplate.getForObject(url, GoogleResponse.class);
-        if(!googleResponse.isSuccess()) {
-            //throw new Exception("reCaptcha was not successfully validated.");
-            return null;
-        }
-
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -83,5 +72,30 @@ public class AccountService {
         return AuthResponseDto.builder()
                 .token(jwtToken)
                 .build();
+    }
+
+    public AuthResponseDto googleAuth(GoogleIdToken.Payload request) {
+        String email = request.getEmail();
+        Optional<UserEntity> user = repository.findByEmail(email);
+        if(user.isEmpty())
+        {
+            RegisterDto newUser = new RegisterDto().builder()
+                    .email(email)
+                    .firstname((String)request.get("given_name"))
+                    .lastname((String)request.get("family_name"))
+                    .password("0000000")
+                    .build();
+            return register(newUser);
+        }
+        var jwtToken = jwtService.generateAccessToken(user.get());
+        return AuthResponseDto.builder()
+                .token(jwtToken)
+                .build();
+    }
+
+    public GoogleResponse recaptchaCheck(String token)
+    {
+        String url = String.format(RECAPTCHA_URL_TEMPLATE, captchaSettings.getSecret(), token);
+        return restTemplate.getForObject(url, GoogleResponse.class);
     }
 }
